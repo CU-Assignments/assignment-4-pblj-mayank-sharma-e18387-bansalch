@@ -1,51 +1,47 @@
 
-#  Hard Level: Ticket Booking System with Multithreading
+class TicketCounter {
+    private int availableSeats = 10;
 
----
+    public synchronized void bookTicket(String name, int seats) {
+        if (seats <= availableSeats) {
+            System.out.println(name + " booking " + seats + " seats.");
+            availableSeats -= seats;
+            System.out.println("Seats booked. Remaining: " + availableSeats);
+        } else {
+            System.out.println("Not enough seats for " + name);
+        }
+    }
+}
 
-##  Problem Statement
+class BookingThread extends Thread {
+    private TicketCounter counter;
+    private String name;
+    private int seats;
 
-Develop a ticket booking system using synchronized threads to:
-- Prevent double booking
-- Prioritize VIP bookings
+    BookingThread(TicketCounter counter, String name, int seats, int priority) {
+        this.counter = counter;
+        this.name = name;
+        this.seats = seats;
+        this.setPriority(priority);
+    }
 
----
+    public void run() {
+        counter.bookTicket(name, seats);
+    }
+}
 
-##  Key Concepts Used
+public class TicketBookingSystem {
+    public static void main(String[] args) {
+        TicketCounter counter = new TicketCounter();
 
-- Multithreading – For handling booking requests simultaneously
-- Synchronization – To ensure booking is thread-safe
-- Thread Priorities – To handle VIP vs regular bookings
+        BookingThread t1 = new BookingThread(counter, "VIP_1", 2, Thread.MAX_PRIORITY);
+        BookingThread t2 = new BookingThread(counter, "VIP_2", 3, Thread.MAX_PRIORITY);
+        BookingThread t3 = new BookingThread(counter, "Regular_1", 4, Thread.MIN_PRIORITY);
+        BookingThread t4 = new BookingThread(counter, "Regular_2", 3, Thread.MIN_PRIORITY);
 
----
-
-##  How to Run
-
-1. Navigate to the `Hard/` folder.
-2. Compile and run the file:
-```bash
-javac TicketBookingSystem.java
-java TicketBookingSystem
-```
-3. Observe how synchronization and thread priorities affect execution.
-
----
-
-Ticket Booking System with Multithreading(examples)
-
-
-Initial available seats: 10
-
-Thread: VIP_1 trying to book 3 seats.
-Seats booked by VIP_1. Remaining seats: 7
-
-Thread: VIP_2 trying to book 4 seats.
-Seats booked by VIP_2. Remaining seats: 3
-
-Thread: Regular_1 trying to book 2 seats.
-Seats booked by Regular_1. Remaining seats: 1
-
-Thread: Regular_2 trying to book 2 seats.
-Not enough seats for Regular_2. Remaining seats: 1
-
----
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+    }
+}
